@@ -1,0 +1,252 @@
+#!/usr/bin/env python3
+import optparse
+import os
+from os import path
+from subprocess import call
+
+
+REMINDER_NOTE = None
+REMINDER_TIMESTAMP = None
+REMINDER_DETAIL = None
+REMINDER_PRIORITY = "low"
+
+
+################################################################
+####################  Class Definitions  ####################
+################################################################
+
+class StorageManager:
+    '''
+    This class manages connections to persistance engine
+    '''
+    def __init__(self, host, username, password, port):
+        self.host = host
+        self.username = username
+        self.password = password
+        self.port =port
+    
+    # TODO: 
+        # Generate the code to connect to and interface 
+        # with the persistance layer.
+     
+    @staticmethod
+    def StorageManagerrDebug():
+        """
+        This is for Debugging the Reminder Class
+        """
+        return "Hello from the StorageManagerrDebug Static Method"
+
+
+class OptionParser:
+    '''
+    The template for building an option parse, which
+    takes in the arguments when the command line tool is called
+    '''
+
+    def gererate_parser(self):
+        '''
+        Generate the parser and the options for the parsers
+        '''
+        # Show the Usage output and version number in cli output.
+        parser = optparse.OptionParser('Usage: '
+                                   + "remind --note \'Remind me to do something\' \\ \n"
+                                   + "--timestamp YYYYMMDD2460 \\ \n"
+                                   + "--priority high [Optional] \\ \n"
+                                   + "--detail \'These are the note/reminder "
+                                   + "details [Optional]\' \\ \n\\"
+                                   + "\n\n!!! Important: User single quotes for \'note\'"
+                                   + " and \'detail\' !!!",
+                                   version="1.0.0")
+
+        # Handle the -t flag, and it's variable.
+        parser.add_option("-t", "--timestamp",
+                      dest="timestamp",
+                      type="str",
+                      help="When should we remind you?")
+
+        # Handle the -n flag, and the argument that's paassed is assigned
+        # to the "port" parser option.
+        parser.add_option("-n", "--note",
+                      dest="note",
+                      type="str",
+                      help="The message that displays in the reminder")
+
+        parser.add_option("-d", "--detail",
+                      dest="detail",
+                      type="str",
+                      help="Note Details contain more informaion about" +
+                      " the note/reminder. There is an option to review" +
+                      " the details when aknowledginng reminder.")
+
+        parser.add_option("-p", "--priority",
+                      dest="priority",
+                      type="str",
+                      help='Reminder priority options are Low or High.' +
+                      ' Default value is "low"')
+
+        return parser
+
+    def parse_options(self, parser):
+        (options, args) = parser.parse_args()
+        if options.note == None or options.timestamp == None:
+            print(parser.usage)
+            exit_program(8)
+
+        global REMINDER_NOTE
+        global REMINDER_DETAIL
+        global REMINDER_PRIORITY
+        global REMINDER_TIMESTAMP
+        REMINDER_NOTE = options.note
+        REMINDER_DETAIL = options.detail
+        REMINDER_TIMESTAMP = options.timestamp
+        if options.priority == None:
+            REMINDER_PRIORITY = "low"
+        else:
+            if (options.priority.lower() == "high" or
+                    options.priority.lower() == "low"):
+                REMINDER_PRIORITY = options.priority
+            else:
+                print(parser.usage)
+                print("\n\nError: Priority options are \'high\' or \'low\'.")
+                exit_program(8)
+
+
+class Reminder:
+    """
+    A Reminder class
+    """
+
+    def __init__(self, note, detail, timestamp, priority):
+        self.note = note
+        self.detail = detail
+        self.timestamp = timestamp
+        self.priority = priority
+    
+    # Mutators/Setters for instantiating the Reminder
+    def set_note(self, note):
+        self.note = note
+
+    def set_detail(self, detail):
+        self.detail = detail
+    
+    def set_timestamp(self, timestamp):
+        self.timestamp = timestamp
+    
+    def set_priority(self, priority):
+        sellf.priority = priority
+
+    # Accessors/Getters for instantiating the Reminder
+    def get_note(self):
+        return self.note
+    
+    def get_detail(self):
+        return self.detail
+    
+    def get_timestamp(self):
+        return self.timestamp
+    
+    def get_priority(self):
+        return self.priority
+    
+    @staticmethod
+    def ReminderDebug():
+        """
+        This is for Debugging the Reminder Class
+        """
+        return "Hello from the ReminderDebug Static Method"
+    
+    def persist_reminder(self):
+        '''
+        Save the reminder to the dabase.
+        '''
+        # TODO: Write the actual code to save this info to a database.
+        print('Saving note to database')
+        print('Note: ' + REMINDER_NOTE)
+        print('Detail: ' + REMINDER_DETAIL)
+        print('Priority: ' + REMINDER_PRIORITY)
+        print('Timestamp: ' + REMINDER_TIMESTAMP)
+
+
+
+################################################################
+#################### End Class Definitions  ####################
+################################################################
+
+
+# ----
+
+################################################################
+####################  Global Functions  ####################
+################################################################
+
+def bootstrap_application():
+    '''
+    This function organizes the information necessary 
+    to startup the application.
+    '''
+
+
+    # Check for passed in parameters
+    if REMINDER_NOTE:
+        print("passed in note option: " + REMINDER_NOTE)
+
+    if REMINDER_DETAIL:
+        print("passed in detail: " + REMINDER_DETAIL)
+
+    if REMINDER_PRIORITY:
+        print("passed in priority: " + REMINDER_PRIORITY)
+
+    if REMINDER_TIMESTAMP:
+        print("passed in timestamp: " + REMINDER_TIMESTAMP)
+    
+
+
+################################################################
+####################  End Global Functions  ####################
+################################################################
+
+
+# ----
+
+def exit_program(exit_code=8):
+    '''
+    This is the cleanup function of the application
+    This function will cleanup any loose ends, and remove any
+    leftover files/memory
+    '''
+
+    # TODO: Write cleanup code. Delete the script itself
+    
+    exit(exit_code)
+
+################################################################
+####################  Application Startpoint  #################
+################################################################
+
+def Main():
+    '''
+    This is the Main entrypoint for the application
+    '''
+
+    # Generate an Option Parser Object and call it's methods
+    # to generate an aargument/option parser instance
+    # and parse the passed aarguments/options
+    option_parser = OptionParser()
+    parser = option_parser.gererate_parser()
+    option_parser.parse_options(parser)
+
+    # Bootstra the application insance
+    bootstrap_application()
+
+    # Generate a new Reminder Object
+    rem = Reminder(REMINDER_NOTE, REMINDER_DETAIL,
+                   REMINDER_TIMESTAMP, REMINDER_PRIORITY)
+
+    print("-----------------------")
+    # print(Reminder.ReminderDebug())
+    rem.persist_reminder()
+    # print(rem.get_detail())
+
+
+
+if __name__ == "__main__" :Main()
